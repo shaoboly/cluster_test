@@ -17,9 +17,9 @@ group_num = 5
 feature_end = 9
 filter_num = '24401'
 
-server_num= [None ,'24401','24402','24406','24407','24412','24414','24419','24420','24451']
+server_num= ['244' ,'24401','24402','24406','2440606','24407','24412','24415','24419','24420','24451']
 
-standard_line_num = 2
+standard_line_num = 3
 
 #namestr = "no_weigh"
 namestr = ''
@@ -51,12 +51,31 @@ def init_data_get(dir,fileter = filter_num):
     for item in reader:
         tmp = []
 
-        if count!=0 and fileter != None and fileter != item[1][0:5]:
+        if count!=0 and fileter != None and fileter != item[1][0:len(fileter)]:
             count+=1
+            continue
+        if fileter == '24406' and item[1][0:7]=='2440606':
             continue
         tmp.append(item[1])
         for i in range(2,feature_end):
-            tmp.append(item[i])
+            if count==0:
+                tmp.append(item[i])
+                continue
+            if item[i] !='':
+                now = float(item[i])
+            else:
+                now = 0.0
+            if now<0:
+                tmp.append(0.0)
+                continue
+            if now>100 and i==2:
+                tmp.append(100.0)
+                continue
+            if now>100 and i==8:
+                tmp.append(100.0)
+                continue
+            tmp.append(now)
+
 
         tmp.append(item[13])
         init_data.append(tmp)
@@ -73,14 +92,25 @@ def data_read(dir,fileter = filter_num):
     for item in reader:
         tmp = []
 
-        if fileter!=None and fileter!=item[1][0:5]:
+        if fileter!=None and fileter!=item[1][0:len(fileter)]:
+            continue
+        if fileter == '24406' and item[1][0:7]=='2440606':
             continue
         for i in range(2, feature_end):
             if item[i] !='':
-                tmp.append(float(item[i]))
+                now = float(item[i])
             else:
+                now = 0.0
+            if now<0:
                 tmp.append(0.0)
-
+                continue
+            if now>100 and i==2:
+                tmp.append(100.0)
+                continue
+            if now>100 and i==8:
+                tmp.append(100.0)
+                continue
+            tmp.append(now)
         count+=1
         train.append(tmp)
     file.close()
@@ -241,14 +271,14 @@ def data_out(clt,center,fileter = filter_num):
     c_line = 0
     for i in range(0,len(kpi)):
         if  c_line <len(line) and kpi[i]<line[c_line]:
-            writer1.writerow(['---','---','---','---','---','---','---'])
+            writer1.writerow(['kpi»®·Ö', line[c_line], '---', '---', '---', '---', '---', '---', '---'])
             c_line+=1
         writer1.writerow(init_data[i+1]+[kpi[i]])
 
 
 
 
-for i in range(5,8):
+for i in range(6,10):
     for server_name in server_num:
         filter_num = server_name
         group_num = i
